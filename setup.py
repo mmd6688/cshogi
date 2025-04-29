@@ -1,6 +1,7 @@
 from setuptools import setup
 from Cython.Build import build_ext, cythonize
 from setuptools import Extension
+import platform
 
 
 class MyBuildExt(build_ext):
@@ -10,11 +11,12 @@ class MyBuildExt(build_ext):
                 e.extra_compile_args.extend(
                     [
                         "-std=c++11",
-                        "-msse4.2",
-                        "-mavx2",
                         "-Wno-enum-constexpr-conversion",
                     ]
                 )
+                # --- arm64(Apple Silicon) ---
+                if platform.machine() == "arm64":
+                    e.extra_compile_args.append("-march=armv8-a")
         elif self.compiler.compiler_type == "msvc":
             for e in self.extensions:
                 e.extra_compile_args.extend(
@@ -63,11 +65,7 @@ ext_modules = [
         ],
         language="c++",
         include_dirs=["src"],
-        define_macros=[
-            ("HAVE_SSE4", None),
-            ("HAVE_SSE42", None),
-            ("HAVE_AVX2", None),
-        ],
+        define_macros=[],
     ),
     Extension(
         "cshogi.gym_shogi.envs.shogi_env",
@@ -103,13 +101,13 @@ extras_require = {
 
 setup_kwargs = {
     "name": "cshogi",
-    "version": "0.8.9",
+    "version": "0.8.9+arm64",
     "description": "A fast Python shogi library",
     "long_description": None,
     "author": "Tadao Yamaoka",
     "author_email": "tadaoyamaoka@gmail.com",
-    "maintainer": "Tadao Yamaoka",
-    "maintainer_email": "tadaoyamaoka@gmail.com",
+    "maintainer": "mmd-midi",
+    "maintainer_email": "mmd.midi.6688@gmail.com",
     "url": "https://github.com/TadaoYamaoka/cshogi",
     "packages": packages,
     "package_data": package_data,
